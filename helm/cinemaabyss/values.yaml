@@ -1,0 +1,77 @@
+# Глобальные настройки
+global:
+  registry: ghcr.io/anton19840712/architecture-pro-cinemaabyss
+  imageTag: latest
+
+# Proxy Service конфигурация
+proxyService:
+  enabled: true
+  name: proxy-service
+  replicaCount: 2
+  image:
+    repository: proxy-service
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8000
+  env:
+    port: "8000"
+    monolithUrl: "http://monolith:8080"
+    moviesServiceUrl: "http://movies-service:8081"
+    moviesMigrationPercent: "50"
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+  healthCheck:
+    liveness:
+      path: /health
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readiness:
+      path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 5
+
+# Events Service конфигурация
+eventsService:
+  enabled: true
+  name: events-service
+  replicaCount: 2
+  image:
+    repository: events-service
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8082
+  env:
+    port: "8082"
+    kafkaBrokers: "kafka:9092"
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+  healthCheck:
+    liveness:
+      path: /health
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readiness:
+      path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 5
+
+# Ingress конфигурация
+ingress:
+  enabled: true
+  className: nginx
+  host: cinemaabyss.local
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
