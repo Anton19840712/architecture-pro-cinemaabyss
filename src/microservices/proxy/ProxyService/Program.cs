@@ -76,7 +76,20 @@ Console.WriteLine("[DEBUG] ProxyMiddleware added");
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8000";
 Console.WriteLine($"[DEBUG] Starting server on port {port}...");
 Console.WriteLine($"Starting Proxy Service on port {port}");
-app.Run($"http://0.0.0.0:{port}");
+
+// Используем await RunAsync() вместо Run() для лучшего логирования
+try
+{
+    Console.WriteLine($"[DEBUG] About to call app.RunAsync()");
+    await app.RunAsync($"http://0.0.0.0:{port}");
+    Console.WriteLine($"[DEBUG] app.RunAsync() completed");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[ERROR] Failed to start server: {ex.Message}");
+    Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
+    throw;
+}
 
 // ==============================================================================
 // КЛАССЫ
