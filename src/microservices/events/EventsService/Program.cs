@@ -144,55 +144,60 @@ public class KafkaConsumerService : BackgroundService
     {
         _logger.LogInformation("Kafka Consumer Service запускается...");
 
-        var config = new ConsumerConfig
+        var topics = new[] { "user-events", "payment-events", "movie-events" };
+
+        // Retry loop - ждём пока Kafka станет доступна
+        while (!stoppingToken.IsCancellationRequested)
         {
-            BootstrapServers = _bootstrapServers,
-            GroupId = "events-service-consumer-group", // Consumer Group ID
-            AutoOffsetReset = AutoOffsetReset.Earliest, // Читать с начала, если нет сохранённого offset
-            EnableAutoCommit = true, // Автоматически коммитить offset
-            EnableAutoOffsetStore = true
-        };
-
-        using var consumer = new ConsumerBuilder<Ignore, string>(config).Build();
-
-        // ПОДПИСЫВАЕМСЯ на все топики событий
-        consumer.Subscribe(new[] { "user-events", "payment-events", "movie-events" });
-
-        _logger.LogInformation("Consumer подписан на топики: user-events, payment-events, movie-events");
-
-        try
-        {
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                try
+                var config = new ConsumerConfig
                 {
-                    // ЧИТАЕМ сообщение из Kafka (блокирующий вызов)
-                    var consumeResult = consumer.Consume(TimeSpan.FromSeconds(1));
+                    BootstrapServers = _bootstrapServers,
+                    GroupId = "events-service-consumer-group",
+                    AutoOffsetReset = AutoOffsetReset.Earliest,
+                    EnableAutoCommit = true,
+                    EnableAutoOffsetStore = true
+                };
 
-                    if (consumeResult != null)
+                using var consumer = new ConsumerBuilder<Ignore, string>(config).Build();
+
+                // ПОДПИСЫВАЕМСЯ на все топики событий
+                consumer.Subscribe(topics);
+
+                _logger.LogInformation("Consumer подписан на топики: user-events, payment-events, movie-events");
+
+                // Основной цикл потребления
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    try
                     {
-                        // ЛОГИРУЕМ полученное событие
-                        _logger.LogInformation(
-                            $"📥 Получено событие из '{consumeResult.Topic}': {consumeResult.Message.Value} " +
-                            $"[Partition: {consumeResult.Partition}, Offset: {consumeResult.Offset}]");
+                        var consumeResult = consumer.Consume(TimeSpan.FromSeconds(1));
+
+                        if (consumeResult != null)
+                        {
+                            _logger.LogInformation(
+                                $"📥 Получено событие из '{consumeResult.Topic}': {consumeResult.Message.Value} " +
+                                $"[Partition: {consumeResult.Partition}, Offset: {consumeResult.Offset}]");
+                        }
+                    }
+                    catch (ConsumeException ex)
+                    {
+                        _logger.LogWarning(ex, "Ошибка при чтении из Kafka, повторяем...");
+                        await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
                     }
                 }
-                catch (ConsumeException ex)
-                {
-                    _logger.LogError(ex, "Ошибка при чтении из Kafka");
-                }
+
+                consumer.Close();
+                break; // Выходим из retry loop при нормальном завершении
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kafka недоступна, повторная попытка через 10 секунд...");
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Consumer остановлен");
-        }
-        finally
-        {
-            consumer.Close();
-            _logger.LogInformation("Consumer закрыт");
-        }
 
-        await Task.CompletedTask;
+        _logger.LogInformation("Consumer остановлен");
     }
 }
