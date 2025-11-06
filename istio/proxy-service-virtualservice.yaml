@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: proxy-service
+spec:
+  hosts:
+  - proxy-service
+  http:
+  - route:
+    - destination:
+        host: proxy-service
+        port:
+          number: 8000
+    timeout: 10s  # Таймаут запроса - 10 секунд
+    retries:
+      attempts: 3  # 3 попытки при ошибке
+      perTryTimeout: 3s  # Каждая попытка - максимум 3 секунды
+      retryOn: 5xx,reset,connect-failure,refused-stream  # Когда повторять

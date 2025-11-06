@@ -1,0 +1,43 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: cinemaabyss-gateway
+spec:
+  selector:
+    istio: ingressgateway  # Использует стандартный Istio Ingress Gateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "cinemaabyss.local"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: cinemaabyss-gateway-routes
+spec:
+  hosts:
+  - "cinemaabyss.local"
+  gateways:
+  - cinemaabyss-gateway
+  http:
+  # Маршрут для Events API
+  - match:
+    - uri:
+        prefix: "/api/events"
+    route:
+    - destination:
+        host: events-service
+        port:
+          number: 8082
+  # Все остальные запросы идут через Proxy
+  - match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: proxy-service
+        port:
+          number: 8000

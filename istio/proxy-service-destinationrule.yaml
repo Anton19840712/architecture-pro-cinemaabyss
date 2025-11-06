@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: proxy-service
+spec:
+  host: proxy-service
+  trafficPolicy:
+    # Connection Pool Settings - ограничения соединений
+    connectionPool:
+      tcp:
+        maxConnections: 100  # Максимум 100 TCP соединений
+      http:
+        http1MaxPendingRequests: 50  # Максимум 50 ожидающих запросов
+        http2MaxRequests: 100  # Максимум 100 параллельных HTTP/2 запросов
+        maxRequestsPerConnection: 2  # Макс 2 запроса на соединение
+
+    # Outlier Detection - обнаружение проблемных узлов (Circuit Breaker)
+    outlierDetection:
+      consecutiveErrors: 5  # После 5 ошибок подряд - размыкаем цепь
+      interval: 30s  # Проверяем каждые 30 секунд
+      baseEjectionTime: 30s  # Блокируем узел на 30 секунд
+      maxEjectionPercent: 50  # Максимум 50% узлов могут быть заблокированы
+      minHealthPercent: 25  # Минимум 25% узлов должны быть здоровы
