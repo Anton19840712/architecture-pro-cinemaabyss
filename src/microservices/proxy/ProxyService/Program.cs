@@ -77,11 +77,13 @@ var port = Environment.GetEnvironmentVariable("PORT") ?? "8000";
 Console.WriteLine($"[DEBUG] Starting server on port {port}...");
 Console.WriteLine($"Starting Proxy Service on port {port}");
 
-// Используем await RunAsync() вместо Run() для лучшего логирования
+// НЮАНС: Не указываем URL явно, используем ASPNETCORE_HTTP_PORTS env var
+// В Dockerfile установлено: ENV ASPNETCORE_HTTP_PORTS=8000
+// Это позволяет ASP.NET Core самому настроить привязку к порту
 try
 {
     Console.WriteLine($"[DEBUG] About to call app.RunAsync()");
-    await app.RunAsync($"http://0.0.0.0:{port}");
+    await app.RunAsync(); // Убрали явный URL
     Console.WriteLine($"[DEBUG] app.RunAsync() completed");
 }
 catch (Exception ex)
