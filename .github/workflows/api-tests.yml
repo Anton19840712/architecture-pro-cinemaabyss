@@ -37,36 +37,36 @@ jobs:
         run: |
           docker compose up -d
 
-          echo "========== Waiting for services to be ready =========="
-          echo "Waiting for Kafka..."
-          sleep 60
+          echo "========== Waiting for all services to be healthy =========="
 
-          echo "Waiting for other services..."
-          sleep 120
+          # Wait for all services to be healthy
+          timeout=300
+          elapsed=0
+          while [ $elapsed -lt $timeout ]; do
+            status=$(docker compose ps --format json | jq -r '.[] | select(.Service == "monolith" or .Service == "movies-service" or .Service == "events-service" or .Service == "proxy-service") | .Health')
 
-          echo "========== Docker Network Info =========="
-          docker network ls
-          docker network inspect cinemaabyss-network | head -50
+            healthy_count=$(echo "$status" | grep -c "healthy" || true)
 
-          echo "========== Running Containers =========="
+            if [ "$healthy_count" -eq 4 ]; then
+              echo "All services are healthy!"
+              break
+            fi
+
+            echo "Waiting for services to be healthy... ($elapsed/$timeout seconds)"
+            docker compose ps
+            sleep 10
+            elapsed=$((elapsed + 10))
+          done
+
+          if [ $elapsed -ge $timeout ]; then
+            echo "Timeout waiting for services to be healthy"
+            docker compose ps
+            docker compose logs
+            exit 1
+          fi
+
+          echo "========== All Services are Healthy =========="
           docker compose ps
-
-          echo "========== Events Service Logs =========="
-          docker compose logs events-service --tail=30
-
-          echo "========== Monolith Logs =========="
-          docker compose logs monolith --tail=20
-
-          echo "========== Movies Service Logs =========="
-          docker compose logs movies-service --tail=20
-
-          echo "========== Proxy Service Logs =========="
-          docker compose logs proxy-service --tail=20
-
-          echo "========== Testing connectivity from host =========="
-          curl -f http://localhost:8000/health || echo "Proxy health check failed"
-          curl -f http://localhost:8082/health || echo "Events health check failed"
-          curl -f http://localhost:8080/health || echo "Monolith health check failed"
       
       - name: Set up Node.js
         uses: actions/setup-node@v3
