@@ -9,11 +9,16 @@ public static class EventsEndpoints
             .WithName("HealthCheck")
             .WithTags("Health");
 
+        // Health check for tests at /api/events/health
+        app.MapGet("/api/events/health", () => Results.Ok(new { status = true }))
+            .WithName("EventsHealthCheck")
+            .WithTags("Health");
+
         // POST /api/events/user - создание события пользователя
         app.MapPost("/api/events/user", async (UserEvent userEvent, IKafkaProducerService producer) =>
         {
             await producer.ProduceAsync("user-events", userEvent);
-            return Results.Created($"/api/events/user/{userEvent.UserId}", userEvent);
+            return Results.Created($"/api/events/user/{userEvent.UserId}", new { status = "success" });
         })
             .WithName("CreateUserEvent")
             .WithTags("Events");
@@ -22,7 +27,7 @@ public static class EventsEndpoints
         app.MapPost("/api/events/payment", async (PaymentEvent paymentEvent, IKafkaProducerService producer) =>
         {
             await producer.ProduceAsync("payment-events", paymentEvent);
-            return Results.Created($"/api/events/payment/{paymentEvent.PaymentId}", paymentEvent);
+            return Results.Created($"/api/events/payment/{paymentEvent.PaymentId}", new { status = "success" });
         })
             .WithName("CreatePaymentEvent")
             .WithTags("Events");
@@ -31,7 +36,7 @@ public static class EventsEndpoints
         app.MapPost("/api/events/movie", async (MovieEvent movieEvent, IKafkaProducerService producer) =>
         {
             await producer.ProduceAsync("movie-events", movieEvent);
-            return Results.Created($"/api/events/movie/{movieEvent.MovieId}", movieEvent);
+            return Results.Created($"/api/events/movie/{movieEvent.MovieId}", new { status = "success" });
         })
             .WithName("CreateMovieEvent")
             .WithTags("Events");
