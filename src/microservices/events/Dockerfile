@@ -1,31 +1,28 @@
-# Мультистадийная сборка Events Service
-
-# STAGE 1: BUILD
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
+WORKDIR /src
 
-# Копируем .csproj и восстанавливаем зависимости
+# Copy csproj and restore dependencies
 COPY EventsService/*.csproj ./EventsService/
 RUN dotnet restore ./EventsService/EventsService.csproj
 
-# Копируем остальные файлы и собираем проект
+# Copy source code and build
 COPY EventsService/ ./EventsService/
-WORKDIR /app/EventsService
-RUN dotnet publish -c Release -o /app/out
+WORKDIR /src/EventsService
+RUN dotnet publish -c Release -o /app/publish
 
-# STAGE 2: RUNTIME
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
+COPY --from=build /app/publish .
 
-# Копируем собранное приложение из build stage
-COPY --from=build /app/out .
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-# Переменные окружения
+# Set environment variables
+ENV ASPNETCORE_ENVIRONMENT=Development
 ENV ASPNETCORE_URLS=http://+:8082
-ENV PORT=8082
 
-# Открываем порт
 EXPOSE 8082
 
-# Запуск приложения
 ENTRYPOINT ["dotnet", "EventsService.dll"]
