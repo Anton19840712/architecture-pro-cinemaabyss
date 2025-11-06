@@ -39,22 +39,16 @@ jobs:
 
           echo "========== Waiting for all services to be healthy =========="
 
-          # Wait for all services to be healthy (robust check)
+          # Wait for all services to be healthy (simple grep check)
           timeout=600
           elapsed=0
-          services=("monolith" "movies-service" "events-service" "proxy-service")
 
           while [ $elapsed -lt $timeout ]; do
-            healthy_count=0
+            # Count healthy services using grep
+            status_output=$(docker compose ps)
+            healthy_count=$(echo "$status_output" | grep -c "(healthy)" || true)
 
-            for service in "${services[@]}"; do
-              health=$(docker compose ps --format json | jq -s -r ".[] | select(.Service == \"$service\") | .Health // .Status // \"unknown\"" 2>/dev/null || echo "unknown")
-              if [[ "$health" == *"healthy"* ]]; then
-                ((healthy_count++))
-              fi
-            done
-
-            if [ "$healthy_count" -eq 4 ]; then
+            if [ "$healthy_count" -ge 4 ]; then
               echo "All services are healthy!"
               break
             fi
