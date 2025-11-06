@@ -36,12 +36,37 @@ jobs:
       - name: Start services with Docker Compose
         run: |
           docker compose up -d
-          # Wait for services to be ready
-          echo "Waiting for services to be ready..."
-          sleep 180
-          echo "Checking service health..."
+
+          echo "========== Waiting for services to be ready =========="
+          echo "Waiting for Kafka..."
+          sleep 60
+
+          echo "Waiting for other services..."
+          sleep 120
+
+          echo "========== Docker Network Info =========="
+          docker network ls
+          docker network inspect cinemaabyss-network | head -50
+
+          echo "========== Running Containers =========="
           docker compose ps
-          docker compose logs events-service --tail=20
+
+          echo "========== Events Service Logs =========="
+          docker compose logs events-service --tail=30
+
+          echo "========== Monolith Logs =========="
+          docker compose logs monolith --tail=20
+
+          echo "========== Movies Service Logs =========="
+          docker compose logs movies-service --tail=20
+
+          echo "========== Proxy Service Logs =========="
+          docker compose logs proxy-service --tail=20
+
+          echo "========== Testing connectivity from host =========="
+          curl -f http://localhost:8000/health || echo "Proxy health check failed"
+          curl -f http://localhost:8082/health || echo "Events health check failed"
+          curl -f http://localhost:8080/health || echo "Monolith health check failed"
       
       - name: Set up Node.js
         uses: actions/setup-node@v3
