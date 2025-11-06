@@ -30,9 +30,8 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 COPY --from=build /app/out .
 
 # Переменные окружения
-ENV PORT=8000
-ENV ASPNETCORE_HTTP_PORTS=8000
 ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_URLS=http://+:8000
 
 # Открываем порт
 EXPOSE 8000
