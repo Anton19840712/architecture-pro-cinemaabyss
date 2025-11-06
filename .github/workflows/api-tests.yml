@@ -43,7 +43,7 @@ jobs:
           timeout=300
           elapsed=0
           while [ $elapsed -lt $timeout ]; do
-            status=$(docker compose ps --format json | jq -r '.[] | select(.Service == "monolith" or .Service == "movies-service" or .Service == "events-service" or .Service == "proxy-service") | .Health')
+            status=$(docker compose ps --format json | jq -s -r '.[] | select(.Service == "monolith" or .Service == "movies-service" or .Service == "events-service" or .Service == "proxy-service") | .Health')
 
             healthy_count=$(echo "$status" | grep -c "healthy" || true)
 
