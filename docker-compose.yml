@@ -136,6 +136,24 @@ services:
     networks:
       - cinemaabyss-network
 
+  # API Tests (Newman)
+  api-tests:
+    build:
+      context: ./tests/postman
+      dockerfile: Dockerfile
+    container_name: cinemaabyss-api-tests
+    depends_on:
+      - monolith
+      - movies-service
+      - events-service
+      - proxy-service
+    volumes:
+      - ./tests/postman/reports:/app/reports
+    networks:
+      - cinemaabyss-network
+    profiles:
+      - test
+
 volumes:
   postgres-data:
 

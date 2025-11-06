@@ -80,13 +80,9 @@ jobs:
         run: npm install
       
       - name: Run API tests
-        working-directory: tests/postman
         run: |
-          # Build the Docker image
-          docker build -t cinemaabyss-api-tests .
-
-          # Run the tests in Docker
-          docker run --network=cinemaabyss-network -v "$(pwd)/reports:/app/reports" cinemaabyss-api-tests
+          # Run tests via docker compose (shares network with services)
+          docker compose run --rm api-tests
         
       
       - name: Stop services
