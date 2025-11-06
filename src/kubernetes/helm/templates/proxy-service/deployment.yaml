@@ -1,0 +1,52 @@
+{{- if .Values.proxyService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.proxyService.name }}
+  labels:
+    app: {{ .Values.proxyService.name }}
+spec:
+  replicas: {{ .Values.proxyService.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.proxyService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.proxyService.name }}
+    spec:
+      containers:
+      - name: {{ .Values.proxyService.name }}
+        image: "{{ .Values.global.registry }}/{{ .Values.proxyService.image.repository }}:{{ .Values.global.imageTag }}"
+        imagePullPolicy: {{ .Values.proxyService.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.proxyService.service.port }}
+        env:
+        - name: PORT
+          value: "{{ .Values.proxyService.env.port }}"
+        - name: MONOLITH_URL
+          value: "{{ .Values.proxyService.env.monolithUrl }}"
+        - name: MOVIES_SERVICE_URL
+          value: "{{ .Values.proxyService.env.moviesServiceUrl }}"
+        - name: MOVIES_MIGRATION_PERCENT
+          value: "{{ .Values.proxyService.env.moviesMigrationPercent }}"
+        resources:
+          requests:
+            memory: {{ .Values.proxyService.resources.requests.memory }}
+            cpu: {{ .Values.proxyService.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.proxyService.resources.limits.memory }}
+            cpu: {{ .Values.proxyService.resources.limits.cpu }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.proxyService.healthCheck.liveness.path }}
+            port: {{ .Values.proxyService.service.port }}
+          initialDelaySeconds: {{ .Values.proxyService.healthCheck.liveness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.proxyService.healthCheck.liveness.periodSeconds }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.proxyService.healthCheck.readiness.path }}
+            port: {{ .Values.proxyService.service.port }}
+          initialDelaySeconds: {{ .Values.proxyService.healthCheck.readiness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.proxyService.healthCheck.readiness.periodSeconds }}
+{{- end }}

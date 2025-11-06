@@ -1,0 +1,17 @@
+{{- if .Values.eventsService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.eventsService.name }}
+  labels:
+    app: {{ .Values.eventsService.name }}
+spec:
+  type: {{ .Values.eventsService.service.type }}
+  ports:
+  - port: {{ .Values.eventsService.service.port }}
+    targetPort: {{ .Values.eventsService.service.port }}
+    protocol: TCP
+    name: http
+  selector:
+    app: {{ .Values.eventsService.name }}
+{{- end }}

@@ -1,0 +1,17 @@
+{{- if .Values.proxyService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.proxyService.name }}
+  labels:
+    app: {{ .Values.proxyService.name }}
+spec:
+  type: {{ .Values.proxyService.service.type }}
+  ports:
+  - port: {{ .Values.proxyService.service.port }}
+    targetPort: {{ .Values.proxyService.service.port }}
+    protocol: TCP
+    name: http
+  selector:
+    app: {{ .Values.proxyService.name }}
+{{- end }}

@@ -1,185 +1,77 @@
-# Global settings
+# Глобальные настройки
 global:
-  namespace: cinemaabyss
-  domain: cinemaabyss.example.com
+  registry: ghcr.io/anton19840712/architecture-pro-cinemaabyss
+  imageTag: latest
 
-# Image pull secrets
-imagePullSecrets:
-  dockerconfigjson: ewoJImF1dGhzIjogewoJCSJnaGNyLmlvIjogewoJCQkiYXV0aCI6
-# Database configuration
-database:
-  host: postgres
-  port: 5432
-  name: cinemaabyss
-  user: postgres
-  password: cG9zdGdyZXNfcGFzc3dvcmQ=
-  image:
-    repository: postgres
-    tag: 14
-    pullPolicy: IfNotPresent
-  resources:
-    limits:
-      cpu: 1000m
-      memory: 1Gi
-    requests:
-      cpu: 500m
-      memory: 512Mi
-  persistence:
-    enabled: true
-    size: 10Gi
-    accessMode: ReadWriteOnce
-
-# Monolith configuration
-monolith:
-  enabled: true
-  image:
-    repository: ghcr.io/db-exp/cinemaabysstest/monolith
-    tag: latest
-    pullPolicy: Always
-  replicas: 1
-  resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-  service:
-    port: 8080
-    targetPort: 8080
-    type: ClusterIP
-
-# Proxy service configuration
+# Proxy Service конфигурация
 proxyService:
   enabled: true
+  name: proxy-service
+  replicaCount: 2
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/proxy-service
-    tag: latest
+    repository: proxy-service
     pullPolicy: Always
-  replicas: 1
-  resources:
-    limits:
-      cpu: 300m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
   service:
-    port: 80
-    targetPort: 8000
     type: ClusterIP
-
-# Movies service configuration
-moviesService:
-  enabled: true
-  image:
-    repository: ghcr.io/db-exp/cinemaabysstest/movies-service
-    tag: latest
-    pullPolicy: Always
-  replicas: 1
+    port: 8000
+  env:
+    port: "8000"
+    monolithUrl: "http://monolith:8080"
+    moviesServiceUrl: "http://movies-service:8081"
+    moviesMigrationPercent: "50"
   resources:
-    limits:
-      cpu: 300m
-      memory: 256Mi
     requests:
-      cpu: 100m
-      memory: 128Mi
-  service:
-    port: 8081
-    targetPort: 8081
-    type: ClusterIP
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+  healthCheck:
+    liveness:
+      path: /health
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readiness:
+      path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 5
 
-# Events service configuration
+# Events Service конфигурация
 eventsService:
   enabled: true
+  name: events-service
+  replicaCount: 2
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/events-service
-    tag: latest
+    repository: events-service
     pullPolicy: Always
-  replicas: 1
-  resources:
-    limits:
-      cpu: 300m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
   service:
-    port: 8082
-    targetPort: 8082
     type: ClusterIP
-
-# Kafka configuration
-kafka:
-  enabled: true
-  image:
-    repository: wurstmeister/kafka
-    tag: 2.13-2.7.0
-    pullPolicy: IfNotPresent
-  replicas: 1
+    port: 8082
+  env:
+    port: "8082"
+    kafkaBrokers: "kafka:9092"
   resources:
-    limits:
-      cpu: 1000m
-      memory: 1Gi
     requests:
-      cpu: 200m
-      memory: 512Mi
-  persistence:
-    enabled: true
-    size: 5Gi
-    accessMode: ReadWriteOnce
-  topics:
-    - name: movie-events
-      partitions: 1
-      replicationFactor: 1
-    - name: user-events
-      partitions: 1
-      replicationFactor: 1
-    - name: payment-events
-      partitions: 1
-      replicationFactor: 1
-
-# Zookeeper configuration
-zookeeper:
-  enabled: true
-  image:
-    repository: wurstmeister/zookeeper
-    tag: latest
-    pullPolicy: IfNotPresent
-  replicas: 1
-  resources:
+      memory: "128Mi"
+      cpu: "100m"
     limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
-      cpu: 100m
-      memory: 256Mi
-  persistence:
-    enabled: true
-    size: 1Gi
-    accessMode: ReadWriteOnce
+      memory: "256Mi"
+      cpu: "500m"
+  healthCheck:
+    liveness:
+      path: /health
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readiness:
+      path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 5
 
-# Ingress configuration
+# Ingress конфигурация
 ingress:
   enabled: true
   className: nginx
+  host: cinemaabyss.local
   annotations:
-    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
-  hosts:
-    - host: cinemaabyss.example.com
-      paths:
-        - path: /
-          pathType: Prefix
-          service: proxy-service
-          port: 80
-        - path: /api/events
-          pathType: Prefix
-          service: events-service
-          port: 8082
-
-# Application configuration
-config:
-  # Strangler Fig configuration
-  gradualMigration: "true"
-  moviesMigrationPercent: "100"
