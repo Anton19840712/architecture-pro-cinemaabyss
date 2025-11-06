@@ -39,11 +39,11 @@ jobs:
 
           echo "========== Waiting for all services to be healthy =========="
 
-          # Wait for all services to be healthy
-          timeout=300
+          # Wait for all services to be healthy (robust check)
+          timeout=600
           elapsed=0
           while [ $elapsed -lt $timeout ]; do
-            status=$(docker compose ps --format json | jq -s -r '.[] | select(.Service == "monolith" or .Service == "movies-service" or .Service == "events-service" or .Service == "proxy-service") | .Health')
+            status=$(docker compose ps --format json | jq -s -r '.[] | select(.Service == "monolith" or .Service == "movies-service" or .Service == "events-service" or .Service == "proxy-service") | (.Health.Status // .State // "unknown")')
 
             healthy_count=$(echo "$status" | grep -c "healthy" || true)
 
@@ -61,7 +61,7 @@ jobs:
           if [ $elapsed -ge $timeout ]; then
             echo "Timeout waiting for services to be healthy"
             docker compose ps
-            docker compose logs
+            docker compose logs --no-color
             exit 1
           fi
 
@@ -80,11 +80,33 @@ jobs:
         run: npm install
       
       - name: Run API tests
+        id: run_tests
+        continue-on-error: true
         run: |
           # Run tests via docker compose (shares network with services)
           docker compose run --rm api-tests
-        
-      
+
+      - name: Collect logs and artifacts
+        if: always()
+        run: |
+          echo "========== Collecting logs =========="
+          docker compose logs --no-color > compose-logs.txt || true
+          docker compose ps > compose-status.txt || true
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts
+          path: |
+            compose-logs.txt
+            compose-status.txt
+            tests/postman/reports/
+
       - name: Stop services
         if: always()
         run: docker compose down
+
+      - name: Fail if tests failed
+        if: steps.run_tests.outcome == 'failure'
+        run: exit 1

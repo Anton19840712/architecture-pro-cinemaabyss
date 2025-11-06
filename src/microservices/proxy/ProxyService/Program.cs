@@ -5,6 +5,10 @@
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. РЕГИСТРАЦИЯ СЕРВИСОВ
+// Swagger/OpenAPI
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 // HttpClient для отправки запросов в другие сервисы
 builder.Services.AddHttpClient();
 
@@ -43,6 +47,13 @@ builder.Services.AddSingleton<ProxyConfiguration>(sp =>
 });
 
 var app = builder.Build();
+
+// 2.5 SWAGGER UI (в Development)
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 // 3. HEALTH CHECK ENDPOINT
 // Простая проверка здоровья сервиса
@@ -106,8 +117,8 @@ public class ProxyMiddleware
     {
         var path = context.Request.Path.ToString();
 
-        // Пропускаем health check (не проксируем)
-        if (path == "/health")
+        // Пропускаем health check и swagger (не проксируем)
+        if (path == "/health" || path.StartsWith("/swagger"))
         {
             await _next(context);
             return;

@@ -23,12 +23,16 @@ RUN dotnet publish -c Release -o /app/out
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 
+# Устанавливаем curl для healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 # Копируем собранное приложение из build stage
 COPY --from=build /app/out .
 
 # Переменные окружения
-ENV ASPNETCORE_URLS=http://+:8000
 ENV PORT=8000
+ENV ASPNETCORE_HTTP_PORTS=8000
+ENV ASPNETCORE_ENVIRONMENT=Development
 
 # Открываем порт
 EXPOSE 8000
