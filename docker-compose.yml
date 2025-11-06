@@ -142,7 +142,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      ASPNETCORE_URLS: http://+:8000
+      ASPNETCORE_URLS: http://0.0.0.0:8000
       ASPNETCORE_ENVIRONMENT: Development
       MONOLITH_URL: http://monolith:8080
       MOVIES_SERVICE_URL: http://movies-service:8081

@@ -31,7 +31,7 @@ COPY --from=build /app/out .
 
 # Переменные окружения
 ENV ASPNETCORE_ENVIRONMENT=Development
-ENV ASPNETCORE_URLS=http://+:8000
+ENV ASPNETCORE_URLS=http://0.0.0.0:8000
 
 # Открываем порт
 EXPOSE 8000
