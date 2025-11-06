@@ -46,25 +46,35 @@ builder.Services.AddSingleton<ProxyConfiguration>(sp =>
     return config;
 });
 
+Console.WriteLine("[DEBUG] Building application...");
 var app = builder.Build();
+Console.WriteLine("[DEBUG] Application built successfully");
 
 // 2.5 SWAGGER UI (в Development)
+Console.WriteLine($"[DEBUG] Environment: {app.Environment.EnvironmentName}");
 if (app.Environment.IsDevelopment())
 {
+    Console.WriteLine("[DEBUG] Configuring Swagger...");
     app.UseSwagger();
     app.UseSwaggerUI();
+    Console.WriteLine("[DEBUG] Swagger configured");
 }
 
 // 3. HEALTH CHECK ENDPOINT
 // Простая проверка здоровья сервиса
+Console.WriteLine("[DEBUG] Mapping /health endpoint...");
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
+Console.WriteLine("[DEBUG] /health endpoint mapped");
 
 // 4. ПОДКЛЮЧАЕМ MIDDLEWARE ДЛЯ ПРОКСИРОВАНИЯ
 // Все запросы будут проходить через ProxyMiddleware
+Console.WriteLine("[DEBUG] Adding ProxyMiddleware...");
 app.UseMiddleware<ProxyMiddleware>();
+Console.WriteLine("[DEBUG] ProxyMiddleware added");
 
 // 5. ЗАПУСК СЕРВЕРА
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8000";
+Console.WriteLine($"[DEBUG] Starting server on port {port}...");
 Console.WriteLine($"Starting Proxy Service on port {port}");
 app.Run($"http://0.0.0.0:{port}");
 
