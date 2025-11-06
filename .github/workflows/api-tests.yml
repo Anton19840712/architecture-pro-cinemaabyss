@@ -42,17 +42,24 @@ jobs:
           # Wait for all services to be healthy (robust check)
           timeout=600
           elapsed=0
-          while [ $elapsed -lt $timeout ]; do
-            status=$(docker compose ps --format json | jq -s -r '.[] | select(.Service == "monolith" or .Service == "movies-service" or .Service == "events-service" or .Service == "proxy-service") | (.Health.Status // .State // "unknown")')
+          services=("monolith" "movies-service" "events-service" "proxy-service")
 
-            healthy_count=$(echo "$status" | grep -c "healthy" || true)
+          while [ $elapsed -lt $timeout ]; do
+            healthy_count=0
+
+            for service in "${services[@]}"; do
+              health=$(docker compose ps --format json | jq -s -r ".[] | select(.Service == \"$service\") | .Health // .Status // \"unknown\"" 2>/dev/null || echo "unknown")
+              if [[ "$health" == *"healthy"* ]]; then
+                ((healthy_count++))
+              fi
+            done
 
             if [ "$healthy_count" -eq 4 ]; then
               echo "All services are healthy!"
               break
             fi
 
-            echo "Waiting for services to be healthy... ($elapsed/$timeout seconds)"
+            echo "Waiting for services to be healthy... ($healthy_count/4) ($elapsed/$timeout seconds)"
             docker compose ps
             sleep 10
             elapsed=$((elapsed + 10))
