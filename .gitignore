@@ -39,6 +39,20 @@ vendor/
 *.sublime-workspace
 *.sublime-project
 
+# .NET / Visual Studio
+.vs/
+obj/
+bin/
+*.user
+*.suo
+*.csproj.user
+Debug/
+Release/
+
+# Istio installation
+istio-*/
+*.zip
+
 # Docker
 .docker/
 docker-compose.override.yml
