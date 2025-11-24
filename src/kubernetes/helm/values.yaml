@@ -4,6 +4,48 @@ global:
   imageTag: latest
   namespace: cinemaabyss
 
+# Monolith конфигурация
+monolith:
+  enabled: true
+  name: monolith
+  replicas: 1
+  image:
+    repository: ghcr.io/anton19840712/architecture-pro-cinemaabyss/monolith
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# Movies Service конфигурация
+moviesService:
+  enabled: true
+  name: movies-service
+  replicas: 1
+  image:
+    repository: ghcr.io/anton19840712/architecture-pro-cinemaabyss/movies-service
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8081
+    targetPort: 8081
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "300m"
+
 # Proxy Service конфигурация
 proxyService:
   enabled: true
