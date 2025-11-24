@@ -150,6 +150,16 @@ kafka:
     limits:
       memory: "1Gi"
       cpu: "1000m"
+  topics:
+    - name: movie-events
+      partitions: 1
+      replicationFactor: 1
+    - name: user-events
+      partitions: 1
+      replicationFactor: 1
+    - name: payment-events
+      partitions: 1
+      replicationFactor: 1
 
 # Zookeeper конфигурация
 zookeeper:
