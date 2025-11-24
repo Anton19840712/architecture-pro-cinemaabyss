@@ -123,7 +123,7 @@ eventsService:
 ingress:
   enabled: true
   className: nginx
-  host: cinemaabyss.local
+  host: cinemaabyss.example.com
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
