@@ -1,0 +1,52 @@
+{{- if .Values.apiTests.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-tests
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "cinemaabyss.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  collection.json: |
+{{ .Files.Get "tests/CinemaAbyss.postman_collection.json" | indent 4 }}
+  environment.json: |
+{{ .Files.Get "tests/kubernetes-internal.environment.json" | indent 4 }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: api-tests-{{ .Release.Revision }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: api-tests
+    app.kubernetes.io/name: {{ include "cinemaabyss.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: api-tests
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: newman
+        image: postman/newman:6-alpine
+        command:
+          - newman
+          - run
+          - /tests/collection.json
+          - --environment
+          - /tests/environment.json
+          - --reporters
+          - cli
+        volumeMounts:
+        - name: tests
+          mountPath: /tests
+      volumes:
+      - name: tests
+        configMap:
+          name: api-tests
+{{- end }}

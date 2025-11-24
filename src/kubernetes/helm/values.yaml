@@ -206,3 +206,7 @@ database:
     limits:
       memory: "512Mi"
       cpu: "500m"
+
+# API Tests конфигурация
+apiTests:
+  enabled: true
