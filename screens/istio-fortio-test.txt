@@ -1,0 +1,69 @@
+{"ts":1763850075.277904,"level":"info","r":1,"file":"logger.go","line":318,"msg":"Log level is now 3 Warning (was 2 Info)"}
+Fortio 1.73.0 running at 0 queries per second, 16->16 procs, for 30 calls: http://proxy-service:8000/health
+Starting at max qps with 3 thread(s) [gomax 16] for exactly 30 calls (10 per thread + 0)
+{"ts":1763850078.280317,"level":"err","r":20,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:44776->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":0,"run":0}
+{"ts":1763850078.280343,"level":"err","r":21,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:44788->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":1,"run":0}
+{"ts":1763850078.280326,"level":"err","r":22,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:44778->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":2,"run":0}
+{"ts":1763850081.281127,"level":"err","r":22,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:44818->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":2,"run":0}
+{"ts":1763850081.281154,"level":"err","r":21,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:44826->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":1,"run":0}
+{"ts":1763850081.281127,"level":"err","r":20,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:44822->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":0,"run":0}
+{"ts":1763850084.284187,"level":"err","r":22,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:34682->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":2,"run":0}
+{"ts":1763850084.284212,"level":"err","r":20,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:34680->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":0,"run":0}
+{"ts":1763850084.284213,"level":"err","r":21,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:34690->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":1,"run":0}
+{"ts":1763850085.274983,"level":"err","r":20,"file":"http_client.go","line":1134,"msg":"Read error","err":"read tcp 10.1.0.21:34768->10.103.165.0:8000: read: connection reset by peer","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":0,"run":0}
+{"ts":1763850085.275184,"level":"err","r":21,"file":"http_client.go","line":1134,"msg":"Read error","err":"read tcp 10.1.0.21:34742->10.103.165.0:8000: read: connection reset by peer","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":1,"run":0}
+{"ts":1763850085.275193,"level":"err","r":22,"file":"http_client.go","line":1134,"msg":"Read error","err":"read tcp 10.1.0.21:34744->10.103.165.0:8000: read: connection reset by peer","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":2,"run":0}
+{"ts":1763850088.276523,"level":"err","r":20,"file":"http_client.go","line":1134,"msg":"Read error","err":"read tcp 10.1.0.21:34814->10.103.165.0:8000: read: connection reset by peer","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":0,"run":0}
+{"ts":1763850088.276794,"level":"err","r":22,"file":"http_client.go","line":1134,"msg":"Read error","err":"read tcp 10.1.0.21:34788->10.103.165.0:8000: read: connection reset by peer","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":2,"run":0}
+{"ts":1763850088.276848,"level":"err","r":21,"file":"http_client.go","line":1134,"msg":"Read error","err":"read tcp 10.1.0.21:34794->10.103.165.0:8000: read: connection reset by peer","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":1,"run":0}
+{"ts":1763850091.279355,"level":"err","r":21,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:34826->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":1,"run":0}
+{"ts":1763850091.279392,"level":"err","r":22,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:34840->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":2,"run":0}
+{"ts":1763850091.279360,"level":"err","r":20,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:34836->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":0,"run":0}
+{"ts":1763850091.290331,"level":"err","r":22,"file":"http_client.go","line":1134,"msg":"Read error","err":"read tcp 10.1.0.21:56242->10.103.165.0:8000: read: connection reset by peer","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":2,"run":0}
+{"ts":1763850091.290448,"level":"err","r":20,"file":"http_client.go","line":1134,"msg":"Read error","err":"read tcp 10.1.0.21:56226->10.103.165.0:8000: read: connection reset by peer","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":0,"run":0}
+{"ts":1763850091.290463,"level":"err","r":21,"file":"http_client.go","line":1134,"msg":"Read error","err":"read tcp 10.1.0.21:56232->10.103.165.0:8000: read: connection reset by peer","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":1,"run":0}
+{"ts":1763850094.291766,"level":"err","r":20,"file":"http_client.go","line":1134,"msg":"Read error","err":"read tcp 10.1.0.21:56264->10.103.165.0:8000: read: connection reset by peer","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":0,"run":0}
+{"ts":1763850094.292113,"level":"err","r":22,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:56248->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":2,"run":0}
+{"ts":1763850094.292235,"level":"err","r":21,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:56246->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":1,"run":0}
+{"ts":1763850095.274414,"level":"err","r":20,"file":"http_client.go","line":1134,"msg":"Read error","err":"read tcp 10.1.0.21:56280->10.103.165.0:8000: read: connection reset by peer","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":0,"run":0}
+{"ts":1763850097.294814,"level":"err","r":22,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:56288->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":2,"run":0}
+{"ts":1763850097.294786,"level":"err","r":21,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:56272->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":1,"run":0}
+{"ts":1763850098.276184,"level":"err","r":20,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:56306->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":0,"run":0}
+{"ts":1763850100.296320,"level":"err","r":22,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:56342->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":2,"run":0}
+{"ts":1763850100.296416,"level":"err","r":21,"file":"http_client.go","line":1134,"msg":"Timeout error (incomplete/invalid response)","err":"read tcp 10.1.0.21:56330->10.103.165.0:8000: i/o timeout","size":0,"header_len":0,"dest":{"IP":"10.103.165.0","Port":8000,"Zone":""},"url":"http://proxy-service:8000/health","thread":1,"run":0}
+Ended after 25.016546984s : 30 calls. qps=1.1992
+Aggregated Function Time : count 30 avg 2.4343072 +/- 1.055 min 0.010897448 max 3.003045037 sum 73.0292158
+# range, mid point, percentile, count
+>= 0.0108974 <= 0.011 , 0.0109487 , 6.67, 2
+> 0.011 <= 0.012 , 0.0115 , 10.00, 1
+> 0.9 <= 1 , 0.95 , 23.33, 4
+> 3 <= 3.00305 , 3.00152 , 100.00, 23
+# target 50% 3.00106
+# target 75% 3.00205
+# target 90% 3.00265
+# target 99% 3.00301
+# target 99.9% 3.00304
+Error cases : count 30 avg 2.4343072 +/- 1.055 min 0.010897448 max 3.003045037 sum 73.0292158
+# range, mid point, percentile, count
+>= 0.0108974 <= 0.011 , 0.0109487 , 6.67, 2
+> 0.011 <= 0.012 , 0.0115 , 10.00, 1
+> 0.9 <= 1 , 0.95 , 23.33, 4
+> 3 <= 3.00305 , 3.00152 , 100.00, 23
+# target 50% 3.00106
+# target 75% 3.00205
+# target 90% 3.00265
+# target 99% 3.00301
+# target 99.9% 3.00304
+# Socket and IP used for each connection:
+[0]  10 socket used, resolved to 10.103.165.0:8000, connection timing : count 10 avg 0.0001644464 +/- 8.256e-05 min 8.769e-05 max 0.000322399 sum 0.001644464
+[1]  10 socket used, resolved to 10.103.165.0:8000, connection timing : count 10 avg 0.0001747852 +/- 0.0002126 min 5.4122e-05 max 0.000803629 sum 0.001747852
+[2]  10 socket used, resolved to 10.103.165.0:8000, connection timing : count 10 avg 0.0001679347 +/- 0.0001398 min 5.9513e-05 max 0.000569175 sum 0.001679347
+Connection time (s) : count 30 avg 0.00016905543 +/- 0.0001545 min 5.4122e-05 max 0.000803629 sum 0.005071663
+Sockets used: 30 (for perfect keepalive, would be 3)
+Uniform: false, Jitter: false, Catchup allowed: true
+IP addresses distribution:
+10.103.165.0:8000: 30
+Code  -1 : 30 (100.0 %)
+Response Header Sizes : count 30 avg 0 +/- 0 min 0 max 0 sum 0
+Response Body/Total Sizes : count 30 avg 0 +/- 0 min 0 max 0 sum 0
+All done 30 calls (plus 0 warmup) 2434.307 ms avg, 1.2 qps

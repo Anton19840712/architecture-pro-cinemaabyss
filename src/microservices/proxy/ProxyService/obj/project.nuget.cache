@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "/qjrm2WgU/I=",
+  "success": true,
+  "projectFilePath": "C:\\курсы по архитектуре и дополнительному профессиональному саморазвитию\\arch\\sprints\\2s\\architecture-pro-cinemaabyss\\src\\microservices\\proxy\\ProxyService\\ProxyService.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\MSI\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.2\\microsoft.aspnetcore.openapi.9.0.2.nupkg.sha512",
+    "C:\\Users\\MSI\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}

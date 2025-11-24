@@ -1,133 +1,155 @@
-# Global settings
+# Глобальные настройки
 global:
+  registry: ghcr.io/anton19840712/architecture-pro-cinemaabyss
+  imageTag: latest
   namespace: cinemaabyss
-  domain: cinemaabyss.example.com
 
-# Image pull secrets
+# Image Pull Secrets для доступа к private registry
 imagePullSecrets:
-  dockerconfigjson: ewoJImF1dGhzIjogewoJCSJnaGNyLmlvIjogewoJCQkiYXV0aCI6
-# Database configuration
-database:
-  host: postgres
-  port: 5432
-  name: cinemaabyss
-  user: postgres
-  password: cG9zdGdyZXNfcGFzc3dvcmQ=
-  image:
-    repository: postgres
-    tag: 14
-    pullPolicy: IfNotPresent
-  resources:
-    limits:
-      cpu: 1000m
-      memory: 1Gi
-    requests:
-      cpu: 500m
-      memory: 512Mi
-  persistence:
-    enabled: true
-    size: 10Gi
-    accessMode: ReadWriteOnce
+  dockerconfigjson: ""  # Base64 encoded .dockerconfigjson, оставить пустым для public images
 
-# Monolith configuration
+# Общая конфигурация приложения
+config:
+  gradualMigration: "true"
+  moviesMigrationPercent: "50"
+
+# Monolith конфигурация
 monolith:
   enabled: true
+  name: monolith
+  replicas: 1
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/monolith
+    repository: ghcr.io/anton19840712/architecture-pro-cinemaabyss/monolith
     tag: latest
     pullPolicy: Always
-  replicas: 1
-  resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
   service:
+    type: ClusterIP
     port: 8080
     targetPort: 8080
-    type: ClusterIP
-
-# Proxy service configuration
-proxyService:
-  enabled: true
-  image:
-    repository: ghcr.io/db-exp/cinemaabysstest/proxy-service
-    tag: latest
-    pullPolicy: Always
-  replicas: 1
   resources:
-    limits:
-      cpu: 300m
-      memory: 256Mi
     requests:
-      cpu: 100m
-      memory: 128Mi
-  service:
-    port: 80
-    targetPort: 8000
-    type: ClusterIP
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
 
-# Movies service configuration
+# Movies Service конфигурация
 moviesService:
   enabled: true
+  name: movies-service
+  replicas: 1
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/movies-service
+    repository: ghcr.io/anton19840712/architecture-pro-cinemaabyss/movies-service
     tag: latest
     pullPolicy: Always
-  replicas: 1
-  resources:
-    limits:
-      cpu: 300m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
   service:
+    type: ClusterIP
     port: 8081
     targetPort: 8081
-    type: ClusterIP
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "300m"
 
-# Events service configuration
+# Proxy Service конфигурация
+proxyService:
+  enabled: true
+  name: proxy-service
+  replicaCount: 2
+  image:
+    repository: proxy-service
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8000
+  env:
+    port: "8000"
+    monolithUrl: "http://monolith:8080"
+    moviesServiceUrl: "http://movies-service:8081"
+    moviesMigrationPercent: "50"
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+  healthCheck:
+    liveness:
+      path: /health
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readiness:
+      path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 5
+
+# Events Service конфигурация
 eventsService:
   enabled: true
+  name: events-service
+  replicaCount: 2
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/events-service
-    tag: latest
+    repository: events-service
     pullPolicy: Always
-  replicas: 1
-  resources:
-    limits:
-      cpu: 300m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
   service:
-    port: 8082
-    targetPort: 8082
     type: ClusterIP
+    port: 8082
+  env:
+    port: "8082"
+    kafkaBrokers: "kafka:9092"
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+  healthCheck:
+    liveness:
+      path: /health
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readiness:
+      path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 5
 
-# Kafka configuration
+# Ingress конфигурация
+ingress:
+  enabled: true
+  className: nginx
+  host: cinemaabyss.example.com
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+
+# Kafka конфигурация
 kafka:
   enabled: true
+  name: kafka
+  replicas: 1
   image:
     repository: wurstmeister/kafka
-    tag: 2.13-2.7.0
+    tag: "2.13-2.7.0"
     pullPolicy: IfNotPresent
-  replicas: 1
-  resources:
-    limits:
-      cpu: 1000m
-      memory: 1Gi
-    requests:
-      cpu: 200m
-      memory: 512Mi
+  service:
+    port: 9092
   persistence:
-    enabled: true
+    enabled: false
     size: 5Gi
     accessMode: ReadWriteOnce
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "200m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
   topics:
     - name: movie-events
       partitions: 1
@@ -139,47 +161,52 @@ kafka:
       partitions: 1
       replicationFactor: 1
 
-# Zookeeper configuration
+# Zookeeper конфигурация
 zookeeper:
   enabled: true
+  name: zookeeper
+  replicas: 1
   image:
     repository: wurstmeister/zookeeper
     tag: latest
     pullPolicy: IfNotPresent
-  replicas: 1
-  resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
-      cpu: 100m
-      memory: 256Mi
+  service:
+    port: 2181
   persistence:
-    enabled: true
+    enabled: false
     size: 1Gi
     accessMode: ReadWriteOnce
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
 
-# Ingress configuration
-ingress:
+# Database (PostgreSQL) конфигурация
+database:
+  host: postgres
+  port: 5432
+  name: cinemaabyss
+  user: postgres
+  password: cG9zdGdyZXM=  # Base64 encoded "postgres"
+  image:
+    repository: postgres
+    tag: "15"
+    pullPolicy: IfNotPresent
+  persistence:
+    enabled: false
+    size: 1Gi
+    accessMode: ReadWriteOnce
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# API Tests конфигурация
+apiTests:
   enabled: true
-  className: nginx
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-  hosts:
-    - host: cinemaabyss.example.com
-      paths:
-        - path: /
-          pathType: Prefix
-          service: proxy-service
-          port: 80
-        - path: /api/events
-          pathType: Prefix
-          service: events-service
-          port: 8082
-
-# Application configuration
-config:
-  # Strangler Fig configuration
-  gradualMigration: "true"
-  moviesMigrationPercent: "100"

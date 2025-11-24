@@ -36,9 +36,38 @@ jobs:
       - name: Start services with Docker Compose
         run: |
           docker compose up -d
-          # Wait for services to be ready
-          echo "Waiting for services to be ready..."
-          sleep 120
+
+          echo "========== Waiting for all services to be healthy =========="
+
+          # Wait for all services to be healthy (simple grep check)
+          timeout=600
+          elapsed=0
+
+          while [ $elapsed -lt $timeout ]; do
+            # Count healthy services using grep
+            status_output=$(docker compose ps)
+            healthy_count=$(echo "$status_output" | grep -c "(healthy)" || true)
+
+            if [ "$healthy_count" -ge 4 ]; then
+              echo "All services are healthy!"
+              break
+            fi
+
+            echo "Waiting for services to be healthy... ($healthy_count/4) ($elapsed/$timeout seconds)"
+            docker compose ps
+            sleep 10
+            elapsed=$((elapsed + 10))
+          done
+
+          if [ $elapsed -ge $timeout ]; then
+            echo "Timeout waiting for services to be healthy"
+            docker compose ps
+            docker compose logs --no-color
+            exit 1
+          fi
+
+          echo "========== All Services are Healthy =========="
+          docker compose ps
       
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -52,20 +81,33 @@ jobs:
         run: npm install
       
       - name: Run API tests
-        working-directory: tests/postman
+        id: run_tests
+        continue-on-error: true
         run: |
+          # Run tests via docker compose (shares network with services)
+          docker compose run --rm api-tests
 
-          docker compose up -d
-          # Wait for services to be ready
-          echo "Waiting for services to be ready..."
-          sleep 15
-          # Build the Docker image
-          docker build -t cinemaabyss-api-tests .
-          
-          # Run the tests in Docker
-          docker run --network=cinemaabyss-network -v "$(pwd)/reports:/app/reports" cinemaabyss-api-tests
-        
-      
+      - name: Collect logs and artifacts
+        if: always()
+        run: |
+          echo "========== Collecting logs =========="
+          docker compose logs --no-color > compose-logs.txt || true
+          docker compose ps > compose-status.txt || true
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts
+          path: |
+            compose-logs.txt
+            compose-status.txt
+            tests/postman/reports/
+
       - name: Stop services
         if: always()
         run: docker compose down
+
+      - name: Fail if tests failed
+        if: steps.run_tests.outcome == 'failure'
+        run: exit 1

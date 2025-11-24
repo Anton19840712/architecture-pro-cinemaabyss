@@ -1,0 +1,171 @@
+# DestinationRule для Proxy Service с Circuit Breaker
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: proxy-service
+spec:
+  host: proxy-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 2
+    outlierDetection:
+      consecutiveErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 25
+---
+# DestinationRule для Events Service с Circuit Breaker
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: events-service
+spec:
+  host: events-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 2
+    outlierDetection:
+      consecutiveErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 25
+---
+# DestinationRule для Movies Service с Circuit Breaker
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: movies-service
+spec:
+  host: movies-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 2
+    outlierDetection:
+      consecutiveErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 25
+---
+# DestinationRule для Monolith с Circuit Breaker
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: monolith
+spec:
+  host: monolith
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 2
+    outlierDetection:
+      consecutiveErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 25
+---
+# VirtualService для Proxy Service (timeout + retry)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: proxy-service
+spec:
+  hosts:
+  - proxy-service
+  http:
+  - route:
+    - destination:
+        host: proxy-service
+        port:
+          number: 8000
+    timeout: 10s
+    retries:
+      attempts: 3
+      perTryTimeout: 3s
+      retryOn: 5xx,reset,connect-failure,refused-stream
+---
+# VirtualService для Events Service (timeout + retry)
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: events-service
+spec:
+  hosts:
+  - events-service
+  http:
+  - route:
+    - destination:
+        host: events-service
+        port:
+          number: 8082
+    timeout: 10s
+    retries:
+      attempts: 3
+      perTryTimeout: 3s
+      retryOn: 5xx,reset,connect-failure,refused-stream
+---
+# Gateway для внешнего доступа
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: cinemaabyss-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "cinemaabyss.example.com"
+---
+# VirtualService для маршрутизации через Gateway
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: cinemaabyss-gateway-routes
+spec:
+  hosts:
+  - "cinemaabyss.example.com"
+  gateways:
+  - cinemaabyss-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/api/events"
+    route:
+    - destination:
+        host: events-service
+        port:
+          number: 8082
+  - match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: proxy-service
+        port:
+          number: 8000

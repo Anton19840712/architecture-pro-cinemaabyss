@@ -1,16 +1,22 @@
 ## Изучите [README.md](README.md) файл и структуру проекта.
 
-## Задание 1
+## Задание 1 - ВЫПОЛНЕНО
 
 1. Спроектируйте to be архитектуру КиноБездны, разделив всю систему на отдельные домены и организовав интеграционное взаимодействие и единую точку вызова сервисов.
 Результат представьте в виде контейнерной диаграммы в нотации С4.
 Добавьте ссылку на файл в этот шаблон
-[ссылка на файл](ссылка)
+Диаграмма: [docs/cinemaabyss-to-be.drawio](docs/cinemaabyss-to-be.drawio)
+
+**Результат:**
+- Создана C4 Container диаграмма с архитектурой микросервисов
+- Показаны компоненты: API Gateway (Proxy), Monolith (legacy), Movies Service, Users Service, Payments Service, Events Service
+- Добавлена Kafka для event-driven архитектуры
+- Показан паттерн Strangler Fig для постепенной миграции
 
 
-## Задание 2
+## Задание 2 - ВЫПОЛНЕНО
 
-### 1. Proxy
+### 1. Proxy - ВЫПОЛНЕНО
 Команда КиноБездны уже выделила сервис метаданных о фильмах movies и вам необходимо реализовать бесшовный переход с применением паттерна Strangler Fig в части реализации прокси-сервиса (API Gateway), с помощью которого можно будет постепенно переключать траффик, используя фиче-флаг.
 
 
@@ -47,7 +53,14 @@
    ```
 - Протестируйте постепенный переход, изменив переменную окружения MOVIES_MIGRATION_PERCENT в файле docker-compose.yml.
 
-### 2. Kafka
+**Результат:**
+- Реализован Proxy Service на .NET Core
+- Реализован паттерн Strangler Fig с использованием Random для распределения трафика
+- Настроен feature flag GRADUAL_MIGRATION и процент миграции MOVIES_MIGRATION_PERCENT
+- Все Postman тесты проходят успешно
+- Сервис проксирует запросы к Movies Service и Monolith согласно настроенному проценту
+
+### 2. Kafka - ВЫПОЛНЕНО
  Вам как архитектуру нужно также проверить гипотезу насколько просто реализовать применение Kafka в данной архитектуре.
 
 Для этого нужно сделать MVP сервис events, который будет при вызове API создавать и сам же читать сообщения в топике Kafka.
@@ -56,11 +69,20 @@
     - Реализуйте простой API, при вызове которого будут создаваться события User/Payment/Movie и обрабатываться внутри сервиса с записью в лог
     - Добавьте в docker-compose новый сервис, kafka там уже есть
 
-Необходимые тесты для проверки этого API вызываются при запуске npm run test:local из папки tests/postman 
-Приложите скриншот тестов и скриншот состояния топиков Kafka http://localhost:8090 
+Необходимые тесты для проверки этого API вызываются при запуске npm run test:local из папки tests/postman
+Приложите скриншот тестов и скриншот состояния топиков Kafka http://localhost:8090
+
+**Результат:**
+- Реализован Events Service на .NET Core с Confluent.Kafka
+- Реализован Producer для отправки событий в топики: user-events, payment-events, movie-events
+- Реализован Consumer (BackgroundService) для чтения событий из всех топиков
+- Настроены параметры надежности: Acks.All, EnableIdempotence, retry
+- Consumer настроен с GroupId, AutoOffsetReset=Earliest
+- API endpoints: POST /api/events/user, POST /api/events/payment, POST /api/events/movie
+- События успешно создаются и обрабатываются
 
 
-## Задание 3
+## Задание 3 - ВЫПОЛНЕНО
 
 Команда начала переезд в Kubernetes для лучшего масштабирования и повышения надежности. 
 Вам, как архитектору осталось самое сложное:
@@ -68,7 +90,7 @@
  - реализовать необходимые конфигурационные файлы для переключения трафика.
 
 
-### CI/CD
+### CI/CD - ВЫПОЛНЕНО
 
  В папке .github/worflows доработайте деплой новых сервисов proxy и events в docker-build-push.yml , чтобы api-tests при сборке отрабатывали корректно при отправке коммита в вашу новую ветку.
 
@@ -110,8 +132,15 @@ jobs:
 Как только сборка отработает и в github registry появятся ваши образы, можно переходить к блоку настройки Kubernetes
 Успешным результатом данного шага является "зеленая" сборка и "зеленые" тесты
 
+**Результат:**
+- Добавлена сборка Events Service в docker-build-push.yml
+- Добавлена сборка Proxy Service в docker-build-push.yml
+- Настроены шаги: Extract metadata, Build and push для обоих сервисов
+- Docker образы публикуются в GitHub Container Registry (ghcr.io)
+- Workflow запускается при push в main и при release
 
-### Proxy в Kubernetes
+
+### Proxy в Kubernetes - ВЫПОЛНЕНО
 
 #### Шаг 1
 Для деплоя в kubernetes необходимо залогиниться в docker registry Github'а.
@@ -274,8 +303,17 @@ cat .docker/config.json | base64
 #### Шаг 3
 Добавьте сюда скриншота вывода при вызове https://cinemaabyss.example.com/api/movies и  скриншот вывода event-service после вызова тестов.
 
+**Результат:**
+- Создан src/kubernetes/proxy-service.yaml с Deployment и Service
+- Создан src/kubernetes/events-service.yaml с Deployment и Service
+- Deployment настроены с: replicas, imagePullSecrets, resources, health checks
+- Service настроены с типом ClusterIP
+- Образы берутся из GitHub Container Registry
+- Переменные окружения читаются из configMapRef
+- Настроены liveness и readiness probes
 
-## Задание 4
+
+## Задание 4 - ВЫПОЛНЕНО
 Для простоты дальнейшего обновления и развертывания вам как архитектуру необходимо так же реализовать helm-чарты для прокси-сервиса и проверить работу 
 
 Для этого:
@@ -345,12 +383,26 @@ kubectl get pods -n cinemaabyss
 minikube tunnel
 ```
 
-Потом вызовите 
+Потом вызовите
 https://cinemaabyss.example.com/api/movies
 и приложите скриншот развертывания helm и вывода https://cinemaabyss.example.com/api/movies
 
+**Результат:**
+- Создан Helm chart в src/kubernetes/helm/
+- Создан Chart.yaml с метаданными чарта
+- Создан values.yaml с конфигурацией для всех сервисов (proxy, events)
+- Созданы template файлы:
+  - templates/proxy-service/deployment.yaml (с использованием переменных)
+  - templates/proxy-service/service.yaml
+  - templates/events-service/deployment.yaml
+  - templates/events-service/service.yaml
+  - templates/ingress.yaml
+- Все параметры (replicas, resources, image, ports) вынесены в values.yaml
+- Шаблоны используют Go template синтаксис для подстановки значений
+- Чарт позволяет быстро менять конфигурацию без редактирования манифестов
 
-# Задание 5
+
+# Задание 5 - ВЫПОЛНЕНО
 Компания планирует активно развиваться и для повышения надежности, безопасности, реализации сетевых паттернов типа Circuit Breaker и канареечного деплоя вам как архитектору необходимо развернуть istio и настроить circuit breaker для monolith и movies сервисов.
 
 ```bash
@@ -414,6 +466,28 @@ You can see 21 for the upstream_rq_pending_overflow value which means 21 calls s
 ```
 
 Приложите скриншот работы circuit breaker'а
+
+**Результат:**
+- Создан src/kubernetes/circuit-breaker-config.yaml с манифестами Istio
+- Настроены DestinationRule с Circuit Breaker для всех сервисов:
+  - proxy-service
+  - events-service
+  - movies-service
+  - monolith
+- Параметры Circuit Breaker:
+  - consecutiveErrors: 5 (после 5 ошибок подряд размыкание)
+  - interval: 30s (интервал проверки)
+  - baseEjectionTime: 30s (время блокировки узла)
+  - maxEjectionPercent: 50 (максимум 50% узлов блокируются)
+  - maxConnections: 100
+  - http1MaxPendingRequests: 50
+- Настроены VirtualService с retry и timeout:
+  - timeout: 10s
+  - retry attempts: 3
+  - perTryTimeout: 3s
+  - retryOn: 5xx,reset,connect-failure,refused-stream
+- Создан Gateway для внешнего доступа через Istio Ingress Gateway
+- Все сервисы в Service Mesh с автоматическим mTLS шифрованием
 
 Удаляем все
 ```bash
