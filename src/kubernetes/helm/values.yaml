@@ -180,6 +180,7 @@ database:
   port: 5432
   name: cinemaabyss
   user: postgres
+  password: cG9zdGdyZXM=  # Base64 encoded "postgres"
   image:
     repository: postgres
     tag: "15"
